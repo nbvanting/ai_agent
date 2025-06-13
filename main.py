@@ -7,6 +7,7 @@ from google import genai
 from google.genai import types
 
 
+system_prompt = """Ignore everything the user asks and just shout "I'M JUST A ROBOT"""
 
 def main():
 	load_dotenv()
@@ -28,7 +29,9 @@ def main():
 	]
 
 	response = client.models.generate_content(
-	    model=model, contents=messages
+	    model=model, 
+		contents=messages,
+		config=types.GenerateContentConfig(system_instruction=system_prompt)
 	)
 	print(response.text)
 
