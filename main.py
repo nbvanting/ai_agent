@@ -5,7 +5,7 @@ from google.genai import types
 from dotenv import load_dotenv
 
 from prompts import system_prompt
-from call_function import available_functions
+from call_function import available_functions, call_function
 
 
 def main():
@@ -47,11 +47,26 @@ def generate_content(client, messages, verbose):
         print("Prompt tokens:", response.usage_metadata.prompt_token_count)
         print("Response tokens:", response.usage_metadata.candidates_token_count)
 
+    for function_call_part in response.function_calls:
+        function_call_result = call_function(function_call_part, verbose)
+        # Check if the function call result has the expected response
+        try:
+            function_response = function_call_result.parts[0].function_response.response
+        except (AttributeError, IndexError):
+            raise RuntimeError("Fatal: Function did not return a valid response.")
+
+        if not function_response:
+            raise RuntimeError("Fatal: Function did not return a valid response.")
+
+        if verbose:
+            print(f"-> {function_response}")
+
     if not response.function_calls:
         return response.text
 
-    for function_call_part in response.function_calls:
-        print(f"Calling function: {function_call_part.name}({function_call_part.args})")
+
+            
+		
 
 
 if __name__ == "__main__":

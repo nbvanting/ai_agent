@@ -3,8 +3,8 @@ import os
 from google.genai import types
 
 
-schema_write_file_content = types.FunctionDeclaration(
-    name="write_file_content",
+schema_write_file = types.FunctionDeclaration(
+    name="write_file",
     description="Writes content to a file, constrained to the working directory. Includes checks to ensure the file path is within the working directory and creates directories if they do not exist. If the file already exists, it will be overwritten.",
     parameters=types.Schema(
         type=types.Type.OBJECT,
