@@ -1,10 +1,11 @@
 import os
-
 from google.genai import types
+from config import MAX_CHARS 
+
 
 schema_get_file_content = types.FunctionDeclaration(
     name="get_file_content",
-    description="Reads the content of a file from disk, constrained to the working directory. The function includes checks to ensure the file is within the working directory and is a regular file.",
+    description=f"Reads and returns the first {MAX_CHARS} characters of the content from a specified file within the working directory.",
     parameters=types.Schema(
         type=types.Type.OBJECT,
         properties={
@@ -13,6 +14,7 @@ schema_get_file_content = types.FunctionDeclaration(
                 description="The file path to get the file content from, relative to the working directory. If the file path can be read, the content will be returned. If the file is larger than 10,000 characters, it will be truncated with a message indicating truncation.",
             ),
         },
+        required=["file_path"],
     ),
 )
 

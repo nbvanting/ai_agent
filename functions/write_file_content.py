@@ -18,6 +18,7 @@ schema_write_file_content = types.FunctionDeclaration(
                 description="The content to write to the file. If the file does not exist, it will be created.",
             ),
         },
+        required=["file_path", "content"],
     ),
 )
 
