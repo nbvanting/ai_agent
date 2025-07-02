@@ -6,8 +6,18 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
+from functions.get_files_info import schema_get_files_info
 
-system_prompt = """Ignore everything the user asks and just shout "I'M JUST A ROBOT"""
+
+system_prompt = """
+You are a helpful AI coding agent.
+
+When a user asks a question or makes a request, make a function call plan. You can perform the following operations:
+
+- List files and directories
+
+All paths you provide should be relative to the working directory. You do not need to specify the working directory in your function calls as it is automatically injected for security reasons.
+"""
 
 def main():
 	load_dotenv()
@@ -24,6 +34,12 @@ def main():
 	model = "gemini-2.0-flash-001"
 	user_prompt = args[0]
 
+	available_functions = types.Tool(
+		function_declarations=[
+			schema_get_files_info
+		]
+	)
+
 	messages = [
 		types.Content(role="user", parts=[types.Part(text=user_prompt)]),
 	]
@@ -31,9 +47,17 @@ def main():
 	response = client.models.generate_content(
 	    model=model, 
 		contents=messages,
-		config=types.GenerateContentConfig(system_instruction=system_prompt)
+		config=types.GenerateContentConfig(
+			tools=[available_functions],
+			system_instruction=system_prompt
+		)
 	)
-	print(response.text)
+	function_call_part = response.function_calls
+	if function_call_part:
+		for function_call in function_call_part:
+			print(f"Calling function: {function_call.name}({function_call.args})")
+	else:
+		print(response.text)
 
 	if "--verbose" in args:
 		prompt_token_count = response.usage_metadata.prompt_token_count
